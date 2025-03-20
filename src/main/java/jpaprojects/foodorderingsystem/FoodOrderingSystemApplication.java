@@ -10,6 +10,4 @@ public class FoodOrderingSystemApplication {
         SpringApplication.run(FoodOrderingSystemApplication.class, args);
     }
 
-    //Test üçün komment elave etdim
-
 }
