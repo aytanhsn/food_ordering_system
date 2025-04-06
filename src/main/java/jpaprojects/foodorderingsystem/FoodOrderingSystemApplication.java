@@ -10,6 +10,4 @@ public class FoodOrderingSystemApplication {
         SpringApplication.run(FoodOrderingSystemApplication.class, args);
     }
 
-    //oz brachima gondermek uchun test
-
 }
