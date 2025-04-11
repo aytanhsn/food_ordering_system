@@ -7,15 +7,14 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class MenuItemResponseDTO {
     private Long id;
     private String name;
     private String description;
-    private BigDecimal price;
+    private Double price;
     private String imageUrl;
     private Category category;
-    private Long restaurantId;
+
+    private Long restaurantId;   // Restaurant ID
+    private String restaurantName;   // Restaurant adı
 }

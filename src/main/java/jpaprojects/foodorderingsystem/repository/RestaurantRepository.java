@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
-    boolean existsByName(String name);
+    // Bu repository sadəcə `findAll` istifadə edirik, çünki müştərilərə bütün restoranları göstərəcəyik
 }

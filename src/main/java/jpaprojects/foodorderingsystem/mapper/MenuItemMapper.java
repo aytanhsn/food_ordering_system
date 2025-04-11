@@ -1,16 +1,21 @@
 package jpaprojects.foodorderingsystem.mapper;
-
 import jpaprojects.foodorderingsystem.dtos.request.MenuItemRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.MenuItemResponseDTO;
 import jpaprojects.foodorderingsystem.entity.MenuItem;
-import org.mapstruct.Mapper;
+import jpaprojects.foodorderingsystem.entity.Restaurant;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
-@Mapper
+import java.util.List;
+
+@Mapper(componentModel = "spring")
 public interface MenuItemMapper {
-    MenuItemMapper INSTANCE = Mappers.getMapper(MenuItemMapper.class);
+    MenuItemResponseDTO toDTO(MenuItem entity);
 
-    MenuItem toEntity(MenuItemRequestDTO dto);
-
-    MenuItemResponseDTO toDto(MenuItem entity);
+    // MenuItemRequestDTO içərisindəki restaurantId ilə əlaqəli Restaurant tapıb MenuItem yaratmaq
+    @Mapping(target = "restaurant", source = "restaurant")
+    MenuItem toEntity(MenuItemRequestDTO dto, Restaurant restaurant);
 }
+
+
