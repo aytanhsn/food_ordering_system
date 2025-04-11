@@ -63,7 +63,7 @@ public class JwtUtil {
                 .get("roles", String.class);
 
         // Rolu əlavə edirik
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 
         return new UsernamePasswordAuthenticationToken(email, null, Collections.singletonList(authority));
     }

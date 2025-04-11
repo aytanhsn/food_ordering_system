@@ -11,11 +11,18 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface MenuItemMapper {
-    MenuItemResponseDTO toDTO(MenuItem entity);
 
-    // MenuItemRequestDTO içərisindəki restaurantId ilə əlaqəli Restaurant tapıb MenuItem yaratmaq
-    @Mapping(target = "restaurant", source = "restaurant")
-    MenuItem toEntity(MenuItemRequestDTO dto, Restaurant restaurant);
+    // MenuItemRequestDTO-nun restaurantId-sini restaurant obyektinə çeviririk
+    @Mapping(source = "restaurantId", target = "restaurant.id")
+    MenuItem toEntity(MenuItemRequestDTO dto, @Context Restaurant restaurant);
+
+    // MenuItem entity-ni MenuItemResponseDTO-ya çevirmək
+    @Mapping(source = "restaurant.id", target = "restaurantId")
+    @Mapping(source = "restaurant.name", target = "restaurantName")
+    MenuItemResponseDTO toDTO(MenuItem menuItem);
 }
+
+
+
 
 
