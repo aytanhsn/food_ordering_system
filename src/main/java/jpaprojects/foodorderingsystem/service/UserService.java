@@ -1,6 +1,7 @@
 package jpaprojects.foodorderingsystem.service;
 
 import jpaprojects.foodorderingsystem.config.JwtUtil;
+import jpaprojects.foodorderingsystem.convertor.UserConverter;
 import jpaprojects.foodorderingsystem.dto.request.UserRegisterRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.request.LoginRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.request.ProfileUpdateRequestDTO;
@@ -9,7 +10,6 @@ import jpaprojects.foodorderingsystem.dtos.response.UserResponseDTO;
 import jpaprojects.foodorderingsystem.entity.User;
 import jpaprojects.foodorderingsystem.enums.Role;
 import jpaprojects.foodorderingsystem.exception.EmailAlreadyExistsException;
-import jpaprojects.foodorderingsystem.mapper.UserMapper;
 import jpaprojects.foodorderingsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -24,7 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final UserMapper userMapper; // MapStruct bu instance-ı Spring-ə inject etdirəcək
+    private final UserConverter userConverter;
 
     // Müştəri qeydiyyatı
     public UserResponseDTO registerCustomer(UserRegisterRequestDTO requestDTO) {
@@ -47,12 +47,11 @@ public class UserService {
             throw new EmailAlreadyExistsException("Email already exists!");
         }
 
-        User user = userMapper.toEntity(requestDTO); // INSTANCE yox, Spring-in verdiyi obyekt!
-        user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
-        user.setRole(role);
-
+        String encodedPassword = passwordEncoder.encode(requestDTO.getPassword());
+        User user = userConverter.toEntity(requestDTO, role, encodedPassword);
         User savedUser = userRepository.save(user);
-        return userMapper.toDto(savedUser);
+
+        return userConverter.toDto(savedUser);
     }
 
     // Login əməliyyatı
@@ -64,9 +63,7 @@ public class UserService {
             throw new RuntimeException("Invalid password!");
         }
 
-        // Token yaratmaq üçün email və rol göndəririk
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-
         return new LoginResponseDTO(token, "Müştəri uğurla daxil oldu!");
     }
 
@@ -99,3 +96,4 @@ public class UserService {
         return "Profil uğurla yeniləndi!";
     }
 }
+

@@ -1,10 +1,10 @@
 package jpaprojects.foodorderingsystem.service;
 
+import jpaprojects.foodorderingsystem.convertor.RestaurantConverter;
 import jpaprojects.foodorderingsystem.dtos.request.RestaurantRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.request.RestaurantUpdateRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.RestaurantResponseDTO;
 import jpaprojects.foodorderingsystem.entity.Restaurant;
-import jpaprojects.foodorderingsystem.mapper.RestaurantMapper;
 import jpaprojects.foodorderingsystem.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,11 +24,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
-    private final RestaurantMapper restaurantMapper;
+    private final RestaurantConverter restaurantConverter;
 
     public List<RestaurantResponseDTO> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
-        return restaurantMapper.toRestaurantResponseDTOList(restaurants);
+        return restaurantConverter.toResponseDTOList(restaurants);
     }
 
     public String addRestaurant(RestaurantRequestDTO restaurantRequestDTO) {
@@ -39,26 +39,23 @@ public class RestaurantService {
             return "Restoranın kateqoriyası boş ola bilməz!";
         }
 
-        // Category dəyərinin düzgünlüyünü yoxlamaq
         try {
-            Category.valueOf(restaurantRequestDTO.getCategory()); // burada category doğru olmalıdır
+            Category.valueOf(restaurantRequestDTO.getCategory());
         } catch (IllegalArgumentException e) {
             return "Yanlış kateqoriya dəyəri!";
         }
 
-        // Restaurant-ı entity-yə çeviririk və saxlamağa çalışırıq
-        Restaurant restaurant = restaurantMapper.toEntity(restaurantRequestDTO);
+        Restaurant restaurant = restaurantConverter.toEntity(restaurantRequestDTO);
         restaurantRepository.save(restaurant);
         return "Restoran uğurla əlavə edildi!";
     }
+
     public String updateRestaurant(Long restaurantId, RestaurantUpdateRequestDTO restaurantUpdateRequestDTO) {
         Restaurant existingRestaurant = restaurantRepository.findById(restaurantId).orElse(null);
-
         if (existingRestaurant == null) {
             return "Restoran tapılmadı!";
         }
 
-        // Restoranın məlumatlarını yeniləyirik
         if (restaurantUpdateRequestDTO.getName() != null) {
             existingRestaurant.setName(restaurantUpdateRequestDTO.getName());
         }
@@ -72,7 +69,7 @@ public class RestaurantService {
             existingRestaurant.setRating(restaurantUpdateRequestDTO.getRating());
         }
 
-        restaurantRepository.save(existingRestaurant); // Dəyişiklikləri yadda saxlayırıq
+        restaurantRepository.save(existingRestaurant);
         return "Restoran uğurla yeniləndi!";
     }
 }
