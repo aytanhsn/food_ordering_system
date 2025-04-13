@@ -42,17 +42,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/restaurants/").permitAll() // Restoranları göstərən endpoint
+                        .requestMatchers("/api/restaurants/").permitAll()
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login",
                                 "/api/users/admin/register",
                                 "/api/users/courier/register"
-                        ).permitAll() // Digər açıq endpointlər
-                        .anyRequest().authenticated() // Digər sorğuların autentifikasiya tələb etməsi
+                        ).permitAll()
+                        .requestMatchers("/api/orders/**").authenticated() // ✅ Bura əlavə olundu
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // SESSION yaradılmasına icazə verilmir
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new OncePerRequestFilter() {
                     @Override
                     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

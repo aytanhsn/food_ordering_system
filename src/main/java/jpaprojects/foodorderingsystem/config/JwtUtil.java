@@ -19,16 +19,18 @@ public class JwtUtil {
 
     private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String generateToken(String email) {
+    // Token yaratmaq üçün email və rol əlavə edirik
+    public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("roles", "ADMIN") // Rolu "ADMIN" olaraq təyin edirik
+                .claim("roles", role) // Rolu burada əlavə edirik
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 saatlıq token
                 .signWith(SECRET_KEY)
                 .compact();
     }
 
+    // Token-dən email-i çıxarmaq
     public String extractEmail(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
@@ -38,6 +40,7 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    // Token-i doğrulamaq
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -50,11 +53,11 @@ public class JwtUtil {
         }
     }
 
-    // Authentication yaratmaq üçün sadə method
+    // Authentication yaratmaq
     public Authentication getAuthentication(String token) {
         String email = extractEmail(token);
 
-        // Tokenin içindən rol məlumatını alırıq (yalnız ADMIN rolu nəzərdə tutulur)
+        // Token-dəki rolu alırıq
         String role = Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jpaprojects.foodorderingsystem.enums.Category;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter
 @Setter
@@ -19,7 +21,7 @@ public class MenuItem {
 
     private String name;
     private String description;
-    private Double price;
+    private BigDecimal price;
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)

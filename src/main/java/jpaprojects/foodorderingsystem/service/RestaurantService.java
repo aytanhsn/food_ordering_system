@@ -14,7 +14,7 @@ import java.util.List;
 import jpaprojects.foodorderingsystem.dtos.request.RestaurantRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.RestaurantResponseDTO;
 import jpaprojects.foodorderingsystem.entity.Restaurant;
-import jpaprojects.foodorderingsystem.mapper.RestaurantMapper;
+
 import jpaprojects.foodorderingsystem.repository.RestaurantRepository;
 import jpaprojects.foodorderingsystem.enums.Category;
 import lombok.RequiredArgsConstructor;

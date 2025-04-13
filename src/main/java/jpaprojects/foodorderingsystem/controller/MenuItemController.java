@@ -6,7 +6,6 @@ import jpaprojects.foodorderingsystem.dtos.response.MenuItemResponseDTO;
 import jpaprojects.foodorderingsystem.service.MenuItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,9 +32,9 @@ public class MenuItemController {
 
     // ✅ Delete menu item
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMenuItem(@PathVariable Long id) {
+    public ResponseEntity<String> deleteMenuItem(@PathVariable Long id) {
         service.deleteMenuItem(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Menyu məhsulu uğurla silindi");
     }
 
     // ✅ Get menu items by restaurant

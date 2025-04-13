@@ -26,18 +26,22 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper; // MapStruct bu instance-ı Spring-ə inject etdirəcək
 
+    // Müştəri qeydiyyatı
     public UserResponseDTO registerCustomer(UserRegisterRequestDTO requestDTO) {
         return registerWithRole(requestDTO, Role.CUSTOMER);
     }
 
+    // Admin qeydiyyatı
     public UserResponseDTO registerAdmin(UserRegisterRequestDTO requestDTO) {
         return registerWithRole(requestDTO, Role.ADMIN);
     }
 
+    // Kuryer qeydiyyatı
     public UserResponseDTO registerCourier(UserRegisterRequestDTO requestDTO) {
         return registerWithRole(requestDTO, Role.COURIER);
     }
 
+    // Qeydiyyat üçün ümumi metod
     private UserResponseDTO registerWithRole(UserRegisterRequestDTO requestDTO, Role role) {
         if (userRepository.existsByEmail(requestDTO.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists!");
@@ -51,6 +55,7 @@ public class UserService {
         return userMapper.toDto(savedUser);
     }
 
+    // Login əməliyyatı
     public LoginResponseDTO login(LoginRequestDTO loginRequest) {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found!"));
@@ -59,11 +64,13 @@ public class UserService {
             throw new RuntimeException("Invalid password!");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        // Token yaratmaq üçün email və rol göndəririk
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
         return new LoginResponseDTO(token, "Müştəri uğurla daxil oldu!");
     }
 
+    // Profil yeniləmə əməliyyatı
     public String updateProfile(ProfileUpdateRequestDTO requestDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
