@@ -50,6 +50,10 @@ public class SecurityConfig {
                                 "/api/users/courier/register"
                         ).permitAll()
                         .requestMatchers("/api/orders/**").authenticated() // ✅ Bura əlavə olundu
+                        .requestMatchers("/api/payments/**").permitAll()
+                        .requestMatchers("/api/deliveries/**").permitAll()
+
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

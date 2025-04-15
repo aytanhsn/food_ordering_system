@@ -6,6 +6,7 @@ import jpaprojects.foodorderingsystem.dtos.response.OrderResponseDTO;
 import jpaprojects.foodorderingsystem.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jpaprojects.foodorderingsystem.enums.OrderStatus;
 
@@ -15,6 +16,7 @@ import jpaprojects.foodorderingsystem.enums.OrderStatus;
 public class OrderController {
 
     private final OrderService orderService;
+
     @PostMapping
     public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO orderRequestDTO) {
         OrderResponseDTO response = orderService.createOrder(orderRequestDTO);
@@ -29,5 +31,15 @@ public class OrderController {
     @PutMapping("/{orderId}/status")
     public void updateOrderStatus(@PathVariable Long orderId, @RequestParam OrderStatus status) {
         orderService.updateOrderStatus(orderId, status);
+    }
+
+    // ADMIN - sifarişi kuryerə təyin edir
+    @PutMapping("/{orderId}/assign-courier")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> assignCourierToOrder(
+            @PathVariable Long orderId,
+            @RequestParam Long courierId) {
+        orderService.assignCourier(orderId, courierId);
+        return ResponseEntity.ok("Kuryer uğurla təyin edildi.");
     }
 }
