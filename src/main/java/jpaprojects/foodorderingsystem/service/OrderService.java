@@ -7,8 +7,9 @@ import jpaprojects.foodorderingsystem.dtos.request.OrderRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.OrderResponseDTO;
 import jpaprojects.foodorderingsystem.entity.*;
 import jpaprojects.foodorderingsystem.enums.OrderStatus;
+import jpaprojects.foodorderingsystem.enums.DeliveryStatus;
+import jpaprojects.foodorderingsystem.enums.Role;
 import jpaprojects.foodorderingsystem.exception.ResourceNotFoundException;
-
 import jpaprojects.foodorderingsystem.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class OrderService {
     private final MenuItemRepository menuItemRepository;
     private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
+    private final DeliveryRepository deliveryRepository;
 
     public OrderResponseDTO getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -54,7 +56,7 @@ public class OrderService {
                 .restaurant(restaurant)
                 .status(OrderStatus.PREPARING)
                 .orderTime(LocalDateTime.now())
-                .totalAmount(BigDecimal.ZERO) // Başlanğıc üçün 0
+                .totalAmount(BigDecimal.ZERO)
                 .build();
 
         Set<OrderItem> orderItems = new HashSet<>();
@@ -81,7 +83,32 @@ public class OrderService {
         order.setOrderItems(orderItems);
         Order savedOrder = orderRepository.save(order);
 
-        // OrderItem-lar order ilə cascade ALL olduğuna görə ayrıca saxlamağa ehtiyac yoxdur
         return OrderConverter.toDTO(savedOrder);
+    }
+
+    // Adminin sifarişi kuryerə təyin etməsi
+    @Transactional
+    public void assignCourier(Long orderId, Long courierId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        User courier = userRepository.findById(courierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Courier not found"));
+
+        if (courier.getRole() != Role.COURIER) {
+            throw new IllegalArgumentException("Təyin edilən istifadəçi kuryer deyil.");
+        }
+
+        order.setCourier(courier);
+        orderRepository.save(order);
+
+        Delivery delivery = Delivery.builder()
+                .order(order)
+                .courier(courier)
+                .status(DeliveryStatus.PICKED_UP)
+                .estimatedTime(LocalDateTime.now().plusMinutes(30))
+                .build();
+
+        deliveryRepository.save(delivery);
     }
 }
