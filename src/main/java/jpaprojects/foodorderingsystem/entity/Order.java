@@ -38,4 +38,10 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<OrderItem> orderItems;
+
+    @OneToOne(mappedBy = "order")
+    private Payment payment;
+
+    @OneToOne(mappedBy = "order")
+    private Delivery delivery;
 }

@@ -1,34 +1,21 @@
-package jpaprojects.foodorderingsystem.entity;
+package jpaprojects.foodorderingsystem.dtos.response;
 
-import jakarta.persistence.*;
 import jpaprojects.foodorderingsystem.enums.ReviewTargetType;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "reviews")
-public class Review {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ReviewResponseDTO {
     private Long id;
-
     private String comment;
     private int rating;
-
-    @Enumerated(EnumType.STRING)
     private ReviewTargetType targetType;
-
     private Long targetId;
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private User customer;
-
+    private String customerEmail;
     private LocalDateTime createdAt;
 }
