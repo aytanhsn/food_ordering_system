@@ -52,6 +52,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/**").authenticated() // ✅ Bura əlavə olundu
                         .requestMatchers("/api/payments/**").permitAll()
                         .requestMatchers("/api/deliveries/**").permitAll()
+                        .requestMatchers("/api/reviews/**").permitAll()
+
 
 
                         .anyRequest().authenticated()
