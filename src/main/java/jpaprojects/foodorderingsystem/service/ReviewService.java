@@ -30,20 +30,6 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         List<Order> orders = orderRepository.checkAccessReview(customer.getId(), dto.getTargetId());
-//        List<Order> orders = orderRepository.findAll().stream()
-//                .filter(order -> order.getCustomer().getId().equals(customer.getId()))
-//                .filter(order -> dto.getTargetType() == ReviewTargetType.RESTAURANT ?
-//                        order.getRestaurant().getId().equals(dto.getTargetId()) :
-//                        order.getCourier() != null && order.getCourier().getId().equals(dto.getTargetId()))
-//                .filter(order -> order.getStatus() == OrderStatus.DELIVERED)
-//                .collect(Collectors.toList());
-//
-//        boolean hasSuccessfulPayment = orders.stream().anyMatch(order ->
-//                paymentRepository.findAll().stream()
-//                        .anyMatch(payment ->
-//                                payment.getOrder().getId().equals(order.getId())
-//                                        && payment.getStatus() == PaymentStatus.SUCCESS
-//                        ));
 
         if (orders.isEmpty()) {
             throw new RuntimeException("Rəy yalnız çatdırılmış və ödənişi tamamlanmış sifarişlərə yazıla bilər.");
