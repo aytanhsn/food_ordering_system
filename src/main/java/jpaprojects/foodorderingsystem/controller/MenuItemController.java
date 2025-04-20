@@ -6,6 +6,7 @@ import jpaprojects.foodorderingsystem.dtos.response.MenuItemResponseDTO;
 import jpaprojects.foodorderingsystem.service.MenuItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,27 +18,26 @@ public class MenuItemController {
 
     private final MenuItemService service;
 
-    // ✅ Create menu item
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<MenuItemResponseDTO> addMenuItem(@Valid @RequestBody MenuItemRequestDTO dto) {
         return ResponseEntity.ok(service.addMenuItem(dto));
     }
 
-    // ✅ Update menu item
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<MenuItemResponseDTO> updateMenuItem(@PathVariable Long id,
                                                               @Valid @RequestBody MenuItemRequestDTO dto) {
         return ResponseEntity.ok(service.updateMenuItem(id, dto));
     }
 
-    // ✅ Delete menu item
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMenuItem(@PathVariable Long id) {
         service.deleteMenuItem(id);
         return ResponseEntity.ok("Menyu məhsulu uğurla silindi");
     }
 
-    // ✅ Get menu items by restaurant
     @GetMapping("/restaurant/{restaurantId}")
     public ResponseEntity<List<MenuItemResponseDTO>> getMenuItemsByRestaurant(@PathVariable Long restaurantId) {
         return ResponseEntity.ok(service.getMenuItemsByRestaurant(restaurantId));

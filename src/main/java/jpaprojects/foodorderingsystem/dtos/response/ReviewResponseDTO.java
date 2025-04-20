@@ -16,6 +16,6 @@ public class ReviewResponseDTO {
     private int rating;
     private ReviewTargetType targetType;
     private Long targetId;
-    private String customerEmail;
+    private String customerName;
     private LocalDateTime createdAt;
 }

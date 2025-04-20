@@ -37,4 +37,5 @@ public class Payment {
 
     @Column(unique = true)
     private String transactionId;
+
 }

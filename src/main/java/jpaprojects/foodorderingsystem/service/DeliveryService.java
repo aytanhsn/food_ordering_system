@@ -4,9 +4,12 @@ import jpaprojects.foodorderingsystem.convertor.DeliveryConverter;
 import jpaprojects.foodorderingsystem.dtos.request.DeliveryStatusUpdateRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.DeliveryResponseDTO;
 import jpaprojects.foodorderingsystem.entity.Delivery;
+import jpaprojects.foodorderingsystem.entity.Order;
 import jpaprojects.foodorderingsystem.enums.DeliveryStatus;
+import jpaprojects.foodorderingsystem.enums.OrderStatus;
 import jpaprojects.foodorderingsystem.exception.ResourceNotFoundException;
 import jpaprojects.foodorderingsystem.repository.DeliveryRepository;
+import jpaprojects.foodorderingsystem.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,8 @@ import java.util.stream.Collectors;
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+    private final OrderRepository orderRepository;
+
 
     public List<DeliveryResponseDTO> getCourierDeliveries() {
         String courierEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -43,7 +48,11 @@ public class DeliveryService {
         if (dto.getStatus() == DeliveryStatus.DELIVERED) {
             LocalDateTime now = LocalDateTime.now();
             delivery.setActualDeliveryTime(now);
-            delivery.getOrder().setDeliveryTime(now); // Order obyektində də deliveryTime set olunur
+
+            Order order = delivery.getOrder();
+            order.setDeliveryTime(now);
+            order.setStatus(OrderStatus.DELIVERED); // ✅ Order statusunu DELIVERED et
+            orderRepository.save(order);            // ✅ Order-i DB-də güncəllə
         }
 
         return DeliveryConverter.toDTO(deliveryRepository.save(delivery));

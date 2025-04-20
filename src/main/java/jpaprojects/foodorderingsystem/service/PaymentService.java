@@ -12,6 +12,7 @@ import jpaprojects.foodorderingsystem.repository.OrderRepository;
 import jpaprojects.foodorderingsystem.repository.PaymentRepository;
 import jpaprojects.foodorderingsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,15 +25,15 @@ public class PaymentService {
     private final PaymentConverter converter;
 
     public PaymentResponseDTO makePayment(PaymentRequestDTO dto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
         Order order = orderRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        User customer = userRepository.findById(dto.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-
         Payment payment = converter.toEntity(dto, order, customer);
 
-        // Məbləğ yoxlanır
         if (dto.getAmount().compareTo(order.getTotalAmount()) < 0) {
             payment.setStatus(PaymentStatus.FAILED);
         } else {

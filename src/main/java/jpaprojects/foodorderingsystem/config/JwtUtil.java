@@ -1,73 +1,58 @@
 package jpaprojects.foodorderingsystem.config;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 @Component
 public class JwtUtil {
 
-    private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final long expirationMs = 3600000; // 1 saat
 
-    // Token yaratmaq üçün email və rol əlavə edirik
-    public String generateToken(String email, String role) {
+    public String generateToken(Authentication authentication) {
+        String email = authentication.getName();
+        List<String> roles = authentication.getAuthorities()
+                .stream()
+                .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+                .toList();
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles);
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(email)
-                .claim("roles", role) // Rolu burada əlavə edirik
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 saatlıq token
-                .signWith(SECRET_KEY)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(secretKey)
                 .compact();
     }
 
-    // Token-dən email-i çıxarmaq
     public String extractEmail(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractAllClaims(token).getSubject();
     }
 
-    // Token-i doğrulamaq
+    public List<String> extractRoles(String token) {
+        return extractAllClaims(token).get("roles", List.class);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseClaimsJws(token);
+            extractAllClaims(token); // sadəcə parse et
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
-    }
-
-    // Authentication yaratmaq
-    public Authentication getAuthentication(String token) {
-        String email = extractEmail(token);
-
-        // Token-dəki rolu alırıq
-        String role = Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("roles", String.class);
-
-        // Rolu əlavə edirik
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
-
-        return new UsernamePasswordAuthenticationToken(email, null, Collections.singletonList(authority));
     }
 }

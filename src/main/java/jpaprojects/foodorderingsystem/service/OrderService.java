@@ -6,12 +6,13 @@ import jpaprojects.foodorderingsystem.dtos.request.OrderItemRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.request.OrderRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.OrderResponseDTO;
 import jpaprojects.foodorderingsystem.entity.*;
-import jpaprojects.foodorderingsystem.enums.OrderStatus;
 import jpaprojects.foodorderingsystem.enums.DeliveryStatus;
+import jpaprojects.foodorderingsystem.enums.OrderStatus;
 import jpaprojects.foodorderingsystem.enums.Role;
 import jpaprojects.foodorderingsystem.exception.ResourceNotFoundException;
 import jpaprojects.foodorderingsystem.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -45,7 +46,8 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO dto) {
-        User customer = userRepository.findById(dto.getCustomerId())
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User customer = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId())
@@ -86,7 +88,6 @@ public class OrderService {
         return OrderConverter.toDTO(savedOrder);
     }
 
-    // Adminin sifarişi kuryerə təyin etməsi
     @Transactional
     public void assignCourier(Long orderId, Long courierId) {
         Order order = orderRepository.findById(orderId)

@@ -12,10 +12,15 @@ import jpaprojects.foodorderingsystem.enums.Role;
 import jpaprojects.foodorderingsystem.exception.EmailAlreadyExistsException;
 import jpaprojects.foodorderingsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,7 +68,14 @@ public class UserService {
             throw new RuntimeException("Invalid password!");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.getEmail(),
+                user.getPassword() ,
+                authorities
+        );
+        String token = jwtUtil.generateToken(authentication);
         return new LoginResponseDTO(token, "Müştəri uğurla daxil oldu!");
     }
 
@@ -96,4 +108,3 @@ public class UserService {
         return "Profil uğurla yeniləndi!";
     }
 }
-
