@@ -52,9 +52,10 @@ public class SecurityConfig {
 
                                 .requestMatchers("/success", "/cancel").permitAll()
 
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                                .anyRequest().authenticated()
+
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
