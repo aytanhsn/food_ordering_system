@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -13,11 +12,8 @@ import java.util.Set;
 @Builder
 public class OrderRequestDTO {
     @NotNull
-    private Long customerId;
-
-    @NotNull
     private Long restaurantId;
 
     @NotNull
     private List<OrderItemRequestDTO> items;
-}// menyu məhsulları və miqdar
+}

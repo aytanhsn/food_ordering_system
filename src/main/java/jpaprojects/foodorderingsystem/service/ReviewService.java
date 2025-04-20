@@ -10,6 +10,7 @@ import jpaprojects.foodorderingsystem.enums.ReviewTargetType;
 import jpaprojects.foodorderingsystem.exception.ResourceNotFoundException;
 import jpaprojects.foodorderingsystem.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,10 +27,18 @@ public class ReviewService {
     private final PaymentRepository paymentRepository;
 
     public ReviewResponseDTO submitReview(ReviewRequestDTO dto) {
-        User customer = userRepository.findById(dto.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        List<Order> orders = orderRepository.checkAccessReview(customer.getId(), dto.getTargetId());
+        List<Order> orders;
+
+        if (dto.getTargetType() == ReviewTargetType.COURIER) {
+            orders = orderRepository.checkAccessReviewForCourier(customer.getId(), dto.getTargetId());
+        } else {
+            orders = orderRepository.checkAccessReview(customer.getId(), dto.getTargetId());
+        }
+
 
         if (orders.isEmpty()) {
             throw new RuntimeException("Rəy yalnız çatdırılmış və ödənişi tamamlanmış sifarişlərə yazıla bilər.");
@@ -47,11 +56,9 @@ public class ReviewService {
         return ReviewConverter.toDTO(reviewRepository.save(review));
     }
 
-    public List<ReviewResponseDTO> getReviewsForTarget(String type, Long id) {
-        ReviewTargetType targetType = ReviewTargetType.valueOf(type.toUpperCase());
-        return reviewRepository.findByTargetTypeAndTargetId(targetType, id)
-                .stream()
-                .map(ReviewConverter::toDTO)
-                .collect(Collectors.toList());
+    public List<ReviewResponseDTO> getReviewsForTarget(String targetType, Long targetId) {
+        return reviewRepository.findByTargetTypeAndTargetId(
+                ReviewTargetType.valueOf(targetType.toUpperCase()), targetId
+        ).stream().map(ReviewConverter::toDTO).collect(Collectors.toList());
     }
 }

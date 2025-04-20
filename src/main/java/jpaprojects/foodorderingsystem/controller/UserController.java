@@ -38,6 +38,7 @@ public class UserController {
         // Burada LoginResponseDTO-nu birbaşa qaytarırıq, çünki artıq userService.login metodu bu tipdə cavab verir.
         return userService.login(loginRequestDTO);
     }
+
     @PutMapping("/profile")
     public String updateProfile(@RequestBody ProfileUpdateRequestDTO requestDTO) {
         return userService.updateProfile(requestDTO);

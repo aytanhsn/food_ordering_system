@@ -29,6 +29,7 @@ public class RestaurantController {
         String response = restaurantService.addRestaurant(restaurantRequestDTO);
         return ResponseEntity.ok(response);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateRestaurant(@PathVariable Long id,

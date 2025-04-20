@@ -13,22 +13,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/deliveries")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('COURIER')")
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
-
+    @PreAuthorize("hasRole('COURIER')")
     @GetMapping("/my-orders")
     public List<DeliveryResponseDTO> getMyDeliveries() {
         return deliveryService.getCourierDeliveries();
     }
 
+    @PreAuthorize("hasRole('COURIER')")
     @PutMapping("/{deliveryId}/status")
     public DeliveryResponseDTO updateStatus(@PathVariable Long deliveryId,
                                             @RequestBody DeliveryStatusUpdateRequestDTO dto) {
         return deliveryService.updateDeliveryStatus(deliveryId, dto);
     }
 
+    @PreAuthorize("hasRole('COURIER')")
     @GetMapping("/{deliveryId}/eta")
     public ResponseEntity<String> getEstimatedTime(@PathVariable Long deliveryId) {
         return ResponseEntity.ok(deliveryService.getEstimatedDeliveryTime(deliveryId));

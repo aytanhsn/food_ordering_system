@@ -11,7 +11,7 @@ public class ReviewConverter {
                 .rating(review.getRating())
                 .targetType(review.getTargetType())
                 .targetId(review.getTargetId())
-                .customerEmail(review.getCustomer().getEmail())
+                .customerName(review.getCustomer().getFirstName() + " " + review.getCustomer().getLastName())
                 .createdAt(review.getCreatedAt())
                 .build();
     }

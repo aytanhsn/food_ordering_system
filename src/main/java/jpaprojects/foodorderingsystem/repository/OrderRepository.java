@@ -20,4 +20,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     """)
     List<Order> checkAccessReview(Long customerId , Long targetId);
 
+    @Query("""
+    select o from Order o 
+        where o.customer.id = :customerId 
+        and o.delivery.status = 'DELIVERED'
+        and o.courier.id = :targetId
+        and o.payment.status = 'SUCCESS'
+""")
+    List<Order> checkAccessReviewForCourier(Long customerId , Long targetId);
+
+
 }
