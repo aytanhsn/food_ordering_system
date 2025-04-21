@@ -2,6 +2,7 @@ package jpaprojects.foodorderingsystem.service;
 
 import jakarta.transaction.Transactional;
 import jpaprojects.foodorderingsystem.convertor.OrderConverter;
+import jpaprojects.foodorderingsystem.dtos.request.CourierNotificationEmailDTO;
 import jpaprojects.foodorderingsystem.dtos.request.OrderItemRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.request.OrderRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.OrderResponseDTO;
@@ -23,13 +24,14 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-
+    private final EmailService emailService;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final MenuItemRepository menuItemRepository;
     private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
     private final DeliveryRepository deliveryRepository;
+    private final EmailSenderService emailSenderService;
 
     public OrderResponseDTO getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -40,9 +42,18 @@ public class OrderService {
     public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
         order.setStatus(newStatus);
         orderRepository.save(order);
+
+        // Email göndərmək
+        String subject = "Sifariş Statusu Yeniləndi";
+        String body = String.format("Hörmətli %s, sifarişinizin statusu %s olaraq yeniləndi.",
+                order.getCustomer().getFirstName(), newStatus.name());
+
+        emailService.sendEmail(order.getCustomer().getEmail(), subject, body);
     }
+
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO dto) {
@@ -111,5 +122,17 @@ public class OrderService {
                 .build();
 
         deliveryRepository.save(delivery);
+
+        // ✅ Email göndər (Kuryerə yeni sifariş təyin olundu)
+        CourierNotificationEmailDTO emailDTO = CourierNotificationEmailDTO.builder()
+                .courierEmail(courier.getEmail())
+                .courierName(courier.getFirstName())
+                .orderId(order.getId())
+                .deliveryAddress(order.getRestaurant().getAddress()) // və ya lazım olan digər address
+                .build();
+
+        emailSenderService.sendCourierNotificationEmail(emailDTO);
+
     }
+
 }

@@ -26,35 +26,36 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
 
-                                .requestMatchers("/api/auth/**", "/api/users/login", "/api/users/register").permitAll()
-                                .requestMatchers("/api/users/admin/register", "/api/users/courier/register").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/users/login", "/api/users/register").permitAll()
+                        .requestMatchers("/api/users/admin/register", "/api/users/courier/register").permitAll()
 
-                                .requestMatchers(HttpMethod.POST, "/api/stripe-payments/create-checkout-session").hasRole("CUSTOMER")
-                                .requestMatchers(HttpMethod.GET, "/api/stripe-payments/check-status/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/stripe-payments/create-checkout-session").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/stripe-payments/check-status/**").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.GET, "/api/restaurants/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/restaurants/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/restaurants/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/restaurants/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/restaurants/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/restaurants/**").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.GET, "/api/menu-items/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/menu-items/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/menu-items/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/menu-items/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/menu-items/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/menu-items/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/menu-items/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/menu-items/**").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("CUSTOMER")
-                                .requestMatchers(HttpMethod.GET, "/api/orders/**").authenticated()
-                                .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("ADMIN")
 
-                                .requestMatchers("/api/deliveries/**").hasRole("COURIER")
+                        .requestMatchers("/api/deliveries/**").hasRole("COURIER")
 
-                                .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("CUSTOMER")
-                                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
 
-                                .requestMatchers("/success", "/cancel").permitAll()
+                        .requestMatchers("/success", "/cancel").permitAll()
 
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                                .anyRequest().authenticated()
+
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

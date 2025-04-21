@@ -29,6 +29,7 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/status")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public void updateOrderStatus(@PathVariable Long orderId, @RequestParam OrderStatus status) {
         orderService.updateOrderStatus(orderId, status);
     }

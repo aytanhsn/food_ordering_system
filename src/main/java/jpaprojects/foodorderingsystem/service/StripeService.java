@@ -18,6 +18,7 @@ import jpaprojects.foodorderingsystem.repository.PaymentRepository;
 import jpaprojects.foodorderingsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class StripeService {
 
+    private final EmailSenderService emailSenderService;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
@@ -70,7 +72,7 @@ public class StripeService {
 
         Payment payment = Payment.builder()
                 .order(order)
-                .customer(order.getCustomer()) // customer ID-ni ayrıca göndərməyə ehtiyac yoxdur
+                .customer(order.getCustomer())
                 .amount(order.getTotalAmount())
                 .paymentMethod(PaymentMethod.CREDIT_CARD)
                 .status(PaymentStatus.SUCCESS)
@@ -78,6 +80,19 @@ public class StripeService {
                 .build();
 
         paymentRepository.save(payment);
+
+        // Email göndərmə hissəsi
+        User customer = order.getCustomer();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(customer.getEmail());
+        message.setSubject("Ödəniş Təsdiqi");
+        message.setText("Salam " + customer.getFirstName() + ",\n\n" +
+                "Sizin " + order.getId() + " nömrəli sifariş üçün ödəniş (" +
+                order.getTotalAmount() + " " + request.getCurrency().toUpperCase() +
+                ") uğurla həyata keçirildi.\n\nTəşəkkür edirik!");
+
+        emailSenderService.send(message);
+
         return new StripePaymentResponse(session.getUrl());
     }
 
