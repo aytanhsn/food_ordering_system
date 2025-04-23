@@ -1,8 +1,12 @@
 package jpaprojects.foodorderingsystem.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.annotation.PostConstruct;
 import jpaprojects.foodorderingsystem.dtos.request.StripePaymentRequest;
@@ -34,6 +38,9 @@ public class StripeService {
 
     @Value("${stripe.secret.key}")
     private String stripeSecretKey;
+
+    @Value("${stripe.webhook.secret}")
+    private String webhookSecret;
 
     @PostConstruct
     public void init() {
@@ -75,23 +82,13 @@ public class StripeService {
                 .customer(order.getCustomer())
                 .amount(order.getTotalAmount())
                 .paymentMethod(PaymentMethod.CREDIT_CARD)
-                .status(PaymentStatus.SUCCESS)
+                .status(PaymentStatus.PENDING)
                 .transactionId(session.getId())
                 .build();
 
         paymentRepository.save(payment);
 
-        // Email göndərmə hissəsi
-        User customer = order.getCustomer();
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(customer.getEmail());
-        message.setSubject("Ödəniş Təsdiqi");
-        message.setText("Salam " + customer.getFirstName() + ",\n\n" +
-                "Sizin " + order.getId() + " nömrəli sifariş üçün ödəniş (" +
-                order.getTotalAmount() + " " + request.getCurrency().toUpperCase() +
-                ") uğurla həyata keçirildi.\n\nTəşəkkür edirik!");
-
-        emailSenderService.send(message);
+        System.out.println("Stripe session ID: " + session.getId());
 
         return new StripePaymentResponse(session.getUrl());
     }
@@ -110,5 +107,40 @@ public class StripeService {
 
         paymentRepository.save(payment);
         return payment.getStatus();
+    }
+
+    public void handleStripeWebhook(String payload, String sigHeader) {
+        try {
+            Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+            System.out.println("Stripe event tipi: " + event.getType());
+
+            if ("checkout.session.completed".equals(event.getType())) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode root = objectMapper.readTree(payload);
+                String sessionId = root.path("data").path("object").path("id").asText();
+
+                System.out.println("Webhook session ID: " + sessionId);
+
+                Payment payment = paymentRepository.findByTransactionId(sessionId).orElse(null);
+                if (payment != null && payment.getStatus() == PaymentStatus.PENDING) {
+                    payment.setStatus(PaymentStatus.SUCCESS);
+                    paymentRepository.save(payment);
+
+                    User customer = payment.getCustomer();
+                    SimpleMailMessage message = new SimpleMailMessage();
+                    message.setTo(customer.getEmail());
+                    message.setSubject("Ödəniş Təsdiqi");
+                    message.setText("Salam " + customer.getFirstName() + ",\n\n" +
+                            "Sizin sifariş üçün ödəniş (" + payment.getAmount() + ") uğurla həyata keçirildi.\n\nTəşəkkür edirik!");
+                    emailSenderService.send(message);
+
+                    System.out.println("Ödəniş tamamlandı və DB yeniləndi: " + sessionId);
+                } else {
+                    System.out.println("Payment DB-də tapılmadı və ya artıq SUCCESS-dir.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Stripe webhook xətası: " + e.getMessage());
+        }
     }
 }
