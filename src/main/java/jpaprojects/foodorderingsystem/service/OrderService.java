@@ -1,5 +1,4 @@
 package jpaprojects.foodorderingsystem.service;
-
 import jakarta.transaction.Transactional;
 import jpaprojects.foodorderingsystem.convertor.OrderConverter;
 import jpaprojects.foodorderingsystem.dtos.request.CourierNotificationEmailDTO;
@@ -13,6 +12,7 @@ import jpaprojects.foodorderingsystem.enums.Role;
 import jpaprojects.foodorderingsystem.exception.ResourceNotFoundException;
 import jpaprojects.foodorderingsystem.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -32,10 +31,15 @@ public class OrderService {
     private final RestaurantRepository restaurantRepository;
     private final DeliveryRepository deliveryRepository;
     private final EmailSenderService emailSenderService;
+    @Transactional
+    @Cacheable(value = "orderById", key = "#orderId")
+    public Order getOrderByIdRaw(Long orderId) {
+        return orderRepository.findWithDetailsById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+    }
 
     public OrderResponseDTO getOrderById(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        Order order = getOrderByIdRaw(orderId);
         return OrderConverter.toDTO(order);
     }
 

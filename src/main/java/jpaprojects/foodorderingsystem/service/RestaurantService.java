@@ -7,6 +7,7 @@ import jpaprojects.foodorderingsystem.dtos.response.RestaurantResponseDTO;
 import jpaprojects.foodorderingsystem.entity.Restaurant;
 import jpaprojects.foodorderingsystem.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Service;
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final RestaurantConverter restaurantConverter;
-
+    @Cacheable(value = "restaurants", key = "#root.methodName")
     public List<RestaurantResponseDTO> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         return restaurantConverter.toResponseDTOList(restaurants);

@@ -3,11 +3,14 @@ package jpaprojects.foodorderingsystem.repository;
 import jpaprojects.foodorderingsystem.dtos.request.ReviewRequestDTO;
 import jpaprojects.foodorderingsystem.entity.Order;
 import jpaprojects.foodorderingsystem.enums.OrderStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -28,6 +31,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         and o.payment.status = 'SUCCESS'
 """)
     List<Order> checkAccessReviewForCourier(Long customerId , Long targetId);
-
+    @EntityGraph(attributePaths = {
+            "orderItems",
+            "orderItems.menuItem",
+            "customer",
+            "restaurant",
+            "courier"
+    })
+    Optional<Order> findWithDetailsById(Long id);
 
 }

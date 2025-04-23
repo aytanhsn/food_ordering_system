@@ -1,5 +1,4 @@
 package jpaprojects.foodorderingsystem.service;
-
 import jpaprojects.foodorderingsystem.convertor.MenuItemConverter;
 import jpaprojects.foodorderingsystem.dtos.request.MenuItemRequestDTO;
 import jpaprojects.foodorderingsystem.dtos.response.MenuItemResponseDTO;
@@ -9,9 +8,8 @@ import jpaprojects.foodorderingsystem.exception.ResourceNotFoundException;
 import jpaprojects.foodorderingsystem.repository.MenuItemRepository;
 import jpaprojects.foodorderingsystem.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +50,7 @@ public class MenuItemService {
                 .orElseThrow(() -> new ResourceNotFoundException("Menu item not found with ID: " + id));
         menuItemRepository.delete(item);
     }
-
+    @Cacheable(value = "menuItemsByRestaurant", key = "#restaurantId")
     public List<MenuItemResponseDTO> getMenuItemsByRestaurant(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with ID: " + restaurantId));

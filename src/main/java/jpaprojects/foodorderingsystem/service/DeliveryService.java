@@ -11,6 +11,7 @@ import jpaprojects.foodorderingsystem.exception.ResourceNotFoundException;
 import jpaprojects.foodorderingsystem.repository.DeliveryRepository;
 import jpaprojects.foodorderingsystem.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +26,15 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final OrderRepository orderRepository;
 
-
+    @Cacheable(value = "courierDeliveries", key = "#courierEmail + '_deliveries'")
     public List<DeliveryResponseDTO> getCourierDeliveries() {
         String courierEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Null və ya boş e-poçt yoxlaması
+        if (courierEmail == null || courierEmail.isEmpty()) {
+            throw new IllegalArgumentException("Kurierin e-poçtu null və ya boş ola bilməz.");
+        }
+
         return deliveryRepository.findByCourierEmail(courierEmail).stream()
                 .map(DeliveryConverter::toDTO)
                 .collect(Collectors.toList());
