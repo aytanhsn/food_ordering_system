@@ -51,6 +51,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
 
                         .requestMatchers("/success", "/cancel").permitAll()
+                        .requestMatchers("/reset-password").permitAll()
+
+
+                        .requestMatchers("/api/auth/**").permitAll()
 
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/stripe-payments/webhook").permitAll()
