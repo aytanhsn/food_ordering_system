@@ -55,4 +55,13 @@ public class JwtUtil {
             return false;
         }
     }
+
+    public String generateTokenWithEmailOnly(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(secretKey)
+                .compact();
+    }
 }

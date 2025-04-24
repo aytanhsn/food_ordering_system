@@ -127,7 +127,7 @@ public class OrderService {
 
         deliveryRepository.save(delivery);
 
-        // ✅ Email göndər (Kuryerə yeni sifariş təyin olundu)
+        // Email göndər (Kuryerə yeni sifariş təyin olundu)
         CourierNotificationEmailDTO emailDTO = CourierNotificationEmailDTO.builder()
                 .courierEmail(courier.getEmail())
                 .courierName(courier.getFirstName())
